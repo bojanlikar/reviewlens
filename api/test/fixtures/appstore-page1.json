@@ -1,0 +1,6 @@
+{"feed":{"author":{"name":{"label":"iTunes Store"}},"entry":[
+{"im:name":{"label":"Acme App"},"id":{"label":"https://apps.apple.com/us/app/acme/id111"}},
+{"author":{"name":{"label":"Ann"}},"updated":{"label":"2026-10-05T10:00:00-07:00"},"im:rating":{"label":"1"},"im:version":{"label":"450.1.0"},"id":{"label":"9001"},"title":{"label":"450.1.0 update 😩"},"content":{"label":"Crashes on launch since the update.","attributes":{"type":"text"}}},
+{"author":{"name":{"label":"Bob"}},"updated":{"label":"2026-10-04T09:00:00-07:00"},"im:rating":{"label":"5"},"im:version":{"label":"450.0.0"},"id":{"label":"9002"},"title":{"label":"Love it"},"content":{"label":"Best app for photos."}},
+{"author":{"name":{"label":"Cy"}},"updated":{"label":"2026-10-03T09:00:00-07:00"},"im:rating":{"label":"3"},"id":{"label":"9003"},"title":{"label":""},"content":{"label":""}}
+]}}

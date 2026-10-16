@@ -1,0 +1,20 @@
+What are the top 5 complaints? Rank them and cite reviews.
+reviewlens
+Top 5 complaints (approximate counts within the 500 ingested reviews)
+Counts are my own tally from the sample, so treat them as approximate. Many reviews touch more
+
+api-1  | [Nest] 1  - 10/09/2026, 10:49:00 PM     LOG [RouterExplorer] Mapped {/v1/chat/completions, POST} route +1ms
+api-1  | [Nest] 1  - 10/09/2026, 10:49:00 PM     LOG [NestApplication] Nest application successfully started +11ms
+api-1  | [Nest] 1  - 10/09/2026, 10:49:10 PM     LOG [AppStoreSourceService] Fetched 500 App Store reviews over 10 pages
+api-1  | [Nest] 1  - 10/09/2026, 10:51:02 PM     LOG [ChatController] Chat request stream=true turns=1
+api-1  | [Nest] 1  - 10/09/2026, 10:51:02 PM     LOG [LlmService] LLM request model=claude-sonnet-5-5 systemChars=109309 turns=1
+api-1  | [Nest] 1  - 10/09/2026, 10:51:14 PM     LOG [LlmService] LLM done stop=max_tokens in=28 out=1500 cacheRead=0 cacheWrite=44492 ms=12305
+
+Your question did get an answer, but it was cut off. The log line stop=max_tokens out=1500 shows the model hit the 1500-token output cap at 12 seconds. Your paste stops mid-sentence, which fits that.
+
+The cap may also include tokens the model spends reasoning before it writes, which would explain why so little text came out. That is a guess, since I don’t send a reasoning setting and can’t see this model’s behavior from here. I’ll raise the cap, add a notice when an answer is cut off, and log how many tokens went to reasoning versus visible text.
+
+The chat now works end to end. The only problem left was the answer length, and I’ve changed three things for it. The build and all 53 tests pass, and I confirmed the new zip contains the changes.
+- Higher cap: MAX_OUTPUT_TOKENS now defaults to 4096 instead of 1500.
+- Truncation notice: if an answer still hits the limit, it ends with a note saying it was cut off and suggesting you ask it to continue or narrow the question.
+- Clearer logging: the LLM done log line now shows textChars (visible answer) and thinkingChars (reasoning the model did that visitors never see). If thinkingChars is large, reasoning was using up the output budget.

@@ -1,0 +1,59 @@
+I have an existing app on port 3000 and I have a conflict. can you move it to port 4000
+
+I'll search the project for port 3000 references first.
+
+  Listed 1 directory
+
+⏺ Updated plan
+/plan to preview
+
+⏺ User approved Claude's plan
+Plan saved to: ~/.claude/plans/i-have-an-existing-resilient-pebble.md · /plan to edit
+Move app from host port 3000 to 4000
+
+Context
+
+Host port 3000 conflicts with another process. The only host-published port in this project is Open WebUI, bound as 127.0.0.1:${WEBUI_PORT:-3000}:8080 in docker-compose.yml:33. The NestJS API's port 3000 is internal to the Docker network (expose), so it can't conflict with the host and stays as is.
+
+Changes
+
+1. docker-compose.yml:33 – change default ${WEBUI_PORT:-3000} to ${WEBUI_PORT:-4000}.
+2. .env.example:28 – WEBUI_PORT=4000.
+3. .env – set WEBUI_PORT=4000 if the variable is present (grep found no "3000" there, so likely unset and the new default applies).
+4. README.md:18 and :29 – update http://localhost:4000 and 127.0.0.1:${WEBUI_PORT:-4000}.
+
+Not changed: api/ (Dockerfile, main.ts), expose: ["3000"], OPENAI_API_BASE_URL: http://api:3000/v1 (internal container traffic).
+
+Outside the repo (flag to user)
+
+The nginx reverse proxy config on the server proxies to 127.0.0.1:3000; it needs to be updated to 4000 and reloaded. I can't see it from this project.
+
+Verification
+
+- docker compose config | grep -A1 8080 shows 127.0.0.1:4000.
+- docker compose up -d, then curl -I http://localhost:4000 returns 200.
+
+  Ran 1 shell command
+
+.env does set it (my earlier grep skipped it), so I'll update that too.
+
+  Ran 1 shell command
+
+The app's host port is now 4000. I haven't restarted it or run any checks.
+
+I changed these files:
+- docker-compose.yml: the default is now ${WEBUI_PORT:-4000}.
+- .env and .env.example: WEBUI_PORT=4000.
+- README.md: the URL and the port reference now say 4000.
+
+I left the API's port 3000 alone. It's only reachable inside the Docker network, so it can't conflict with anything on your host.
+
+You still need to do two things:
+- Restart: run docker compose up -d, then check http://localhost:4000.
+- nginx: the nginx config on your server lives outside this project, so I couldn't edit it. Change its proxy_pass from 127.0.0.1:3000 to 127.0.0.1:4000 and reload nginx.
+
+✻ Baked for 18s · done 6:07 PM
+
+❯ I'll configure nginx proxy manually
+
+Sounds good. The nginx change is just proxy_pass pointing at 127.0.0.1:4000 instead of 127.0.0.1:3000, followed by an nginx reload. Everything else in the project is already on 4000. After you restart with docker compose up -d, curl -I http://localhost:4000 should confirm the app is up.

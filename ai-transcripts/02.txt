@@ -1,0 +1,17 @@
+what if I try to fetch reviews from amazon or google maps? are they also protected from bots?
+
+Yes, both are protected, and arguably harder than Trustpilot. This is from general knowledge of those platforms, and I can’t test any of it from my sandbox, so treat it as likely rather than verified.
+
+Amazon
+
+Aggressive bot detection: CAPTCHAs, IP reputation checks and fingerprinting. A plain fetch from a server gets blocked quickly.
+Since 2024, most reviews sit behind a login. The product page shows only a handful, and the full “see all reviews” pages usually require signing in. Scraping while logged in also puts your account at risk.
+The terms of service prohibit scraping. There is no public reviews API for outsiders.
+
+Google Maps
+
+The page is heavily JavaScript-rendered. Reviews load through internal calls as you scroll, so you’d need a headless browser, and Google also flags automated traffic.
+The official Places API is the legitimate route, but it returns only about 5 reviews per place, which is too thin for trend analysis.
+The terms of service restrict scraping here too.
+
+G2 and Capterra also use strong bot protection (Cloudflare-style challenges), so they’re about as hard as Amazon.

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.env
+*.tsbuildinfo
+data/reviews/*.html
+api/state/
+state/

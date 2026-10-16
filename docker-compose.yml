@@ -1,0 +1,72 @@
+services:
+  api:
+    build: ./api
+    restart: unless-stopped
+    environment:
+      REVIEW_SOURCE_URL: ${REVIEW_SOURCE_URL:-}
+      # Offline fallback when the platform blocks scraping (path inside the container, e.g. /data/reviews)
+      REVIEW_SOURCE_FILE: ${REVIEW_SOURCE_FILE:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY in .env}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-5-5}
+      LLM_GATEWAY_KEY: ${LLM_GATEWAY_KEY:-}
+      SNAPSHOT_PATH: /app/state/snapshot.json
+      MAX_PAGES: ${MAX_PAGES:-10}
+      REFRESH_MIN_AGE_HOURS: ${REFRESH_MIN_AGE_HOURS:-6}
+      STEAM_LANGUAGE: ${STEAM_LANGUAGE:-english}
+      MAX_CONTEXT_CHARS: ${MAX_CONTEXT_CHARS:-350000}
+      MAX_OUTPUT_TOKENS: ${MAX_OUTPUT_TOKENS:-4096}
+      LLM_TIMEOUT_MS: ${LLM_TIMEOUT_MS:-120000}
+    volumes:
+      - ./data:/data:ro
+      # Last good ingestion survives restarts/redeploys and failed refreshes
+      - api-state:/app/state
+    # Not published to the host: only Open WebUI can reach the API.
+    expose: ["3000"]
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${WEBUI_PORT:-4000}:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      WEBUI_NAME: ReviewLens AI
+      WEBUI_URL: https://${PUBLIC_HOSTNAME:?set PUBLIC_HOSTNAME in .env}
+      # No login: the portal is open by design (see README for the trade-off).
+      WEBUI_AUTH: "False"
+      ENABLE_OLLAMA_API: "False"
+      OPENAI_API_BASE_URL: http://api:3000/v1
+      OPENAI_API_KEY: ${LLM_GATEWAY_KEY:-none}
+      DEFAULT_MODELS: reviewlens
+      # Title/tag/follow-up/autocomplete helpers would send extra LLM calls
+      # through the scope-guarded model and burn tokens.
+      ENABLE_TITLE_GENERATION: "False"
+      ENABLE_TAGS_GENERATION: "False"
+      ENABLE_FOLLOW_UP_GENERATION: "False"
+      ENABLE_AUTOCOMPLETE_GENERATION: "False"
+      ENABLE_COMMUNITY_SHARING: "False"
+      DEFAULT_PROMPT_SUGGESTIONS: >-
+        [{"title":["Ingestion summary","What was collected?"],"content":"/summary"},
+        {"title":["Top pain points","Ranked, with evidence"],"content":"What are the top 5 pain points customers complain about? Rank them and cite reviews."},
+        {"title":["Trends over time","Is it getting better or worse?"],"content":"How has sentiment changed over the ingested time range?"},
+        {"title":["What do 5★ reviewers love?","Strengths to protect"],"content":"What do the 4 and 5 star reviews praise most?"}]
+
+  # Optional: docker compose --profile tunnel up -d
+  # In Cloudflare Zero Trust, point the tunnel's public hostname
+  # (PUBLIC_HOSTNAME) at http://open-webui:8080.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on: [open-webui]
+
+volumes:
+  open-webui-data:
+  api-state:

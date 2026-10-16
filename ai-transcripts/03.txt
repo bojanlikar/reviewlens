@@ -1,0 +1,15 @@
+multiple adapters can be improvement (the tasks ask for what I would improve). Can you confirm that apple will work?
+
+I’ll check that directly. First I’ll try the feed from the sandbox, then look for current information on whether Apple still supports it.
+
+I can’t confirm it. My sandbox can’t reach Apple’s servers (the proxy returns 403), and the search didn’t settle it. What I found:
+
+An Apple developer forum thread, iTunes Service API not returning reviews for some apps, shows the reviews feed has returned empty results for some apps in the past.
+A separate thread, Why this api rss.itunes.apple.com… does not work again?, covers Apple’s marketing-charts feeds. That is a different endpoint from the customer-reviews feed, but it shows Apple’s RSS services have been flaky.
+
+From memory, the feed has worked for years without authentication. It returns up to about 500 recent reviews (10 pages of 50) per country, with 1-5 star ratings. Because Apple makes no stability promise, it could behave differently from what I remember.
+
+You can settle it in about ten seconds from your own machine:
+
+curl -s "https://itunes.apple.com/us/rss/customerreviews/id=389801252/sortby=mostrecent/json" \
+  | python3 -c "import sys,json; d=json.load(sys.stdin); e=d['feed'].get('entry',[]); print(len(e),'entries'); print(e[-1]['im:rating']['label'], e[-1]['title']['label'])"

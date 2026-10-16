@@ -1,0 +1,63 @@
+{
+ "success": 1,
+ "query_summary": {
+  "num_reviews": 4,
+  "review_score": 9,
+  "review_score_desc": "Overwhelmingly Positive",
+  "total_positive": 900,
+  "total_negative": 100,
+  "total_reviews": 1000
+ },
+ "reviews": [
+  {
+   "recommendationid": "101",
+   "author": {
+    "steamid": "x1",
+    "playtime_forever": 1200,
+    "playtime_at_review": 660
+   },
+   "language": "english",
+   "review": "Brilliant puzzles.\nLoved the co-op.",
+   "timestamp_created": 1788000000,
+   "voted_up": true,
+   "votes_up": 12
+  },
+  {
+   "recommendationid": "102",
+   "author": {
+    "steamid": "x2",
+    "playtime_forever": 30
+   },
+   "language": "english",
+   "review": "Crashes on launch.",
+   "timestamp_created": 1787900000,
+   "voted_up": false,
+   "votes_up": 3
+  },
+  {
+   "recommendationid": "103",
+   "author": {
+    "steamid": "x3",
+    "playtime_at_review": 60
+   },
+   "language": "english",
+   "review": "   ",
+   "timestamp_created": 1787800000,
+   "voted_up": true,
+   "votes_up": 0
+  },
+  {
+   "recommendationid": "104",
+   "author": {
+    "steamid": "x4",
+    "playtime_at_review": 120
+   },
+   "language": "english",
+   "review": "Short but sweet.",
+   "timestamp_created": 1787700000,
+   "voted_up": true,
+   "votes_up": 1
+  }
+ ],
+ "cursor": "AoJ4abc+/="
+}

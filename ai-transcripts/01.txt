@@ -1,0 +1,10 @@
+ERROR [IngestionService] Ingestion failed: HTTP 403 for https://www.trustpilot.com/review/www.google.com?sort=recency
+
+
+That 403 is Trustpilot blocking the request, not a bug in your setup. It sits behind bot protection, and Node’s built-in fetch is easily recognised as non-browser traffic, so changing the User-Agent is unlikely to fix it on its own. I couldn’t get through from my sandbox either, so I can’t promise which approach gets past it from your server.
+
+The brief allows for this: it says the app may “allow the user to supply the data in a practical format”. So I’ll add an offline ingestion path that always works, with the Trustpilot page(s) saved from your browser or a JSON file, and make the 403 error say what to do.
+
+The scraper now sends fuller browser-style headers. This is a cheap extra attempt, not a fix.
+The 403 error now explains the workaround, in the logs and in /summary.
+REVIEW_SOURCE_URL is now optional when REVIEW_SOURCE_FILE is set.
